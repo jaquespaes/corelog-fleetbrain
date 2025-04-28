@@ -16,6 +16,9 @@ def carregar_planilhas():
     try:
         frota = pd.read_excel('frota_dados.xlsx')
         pedidos = pd.read_excel('pedidos_dados.xlsx')
+        # Garantindo que as datas sejam convertidas para o formato datetime
+        pedidos['Data Limite Coleta'] = pd.to_datetime(pedidos['Data Limite Coleta'], errors='coerce')
+        pedidos['Data Limite Entrega'] = pd.to_datetime(pedidos['Data Limite Entrega'], errors='coerce')
         return frota, pedidos
     except Exception as e:
         st.error(f"Erro ao carregar as planilhas: {e}")
