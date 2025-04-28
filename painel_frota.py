@@ -11,7 +11,7 @@ def calcular_distancia(lat1, lon1, lat2, lon2):
     return geodesic(origem, destino).km
 
 # Função para carregar as planilhas
-@st.cache
+@st.cache_data
 def carregar_planilhas():
     try:
         frota = pd.read_excel('frota_dados.xlsx')
@@ -51,8 +51,19 @@ def gerar_mapa(frota, pedidos):
 
     return mapa
 
+# Função para dividir os pedidos
+def dividir_pedidos(pedidos):
+    pendentes = pedidos[pedidos['Data Limite Coleta'] >= pd.Timestamp.now()]
+    atrasados_coleta = pedidos[pedidos['Data Limite Coleta'] < pd.Timestamp.now()]
+    atrasados_entrega = pedidos[pedidos['Data Limite Entrega'] < pd.Timestamp.now()]
+    
+    return pendentes, atrasados_coleta, atrasados_entrega
+
 # Título do painel
 st.title('Corelog FleetBrain')
+
+# Logo no topo
+st.image('corelog.png', width=200)
 
 # Explicação sobre os tiers
 st.info("""
@@ -73,6 +84,19 @@ if frota is not None and pedidos is not None:
 
     st.subheader("Pedidos Pendentes")
     st.dataframe(pedidos)
+
+    # Dividindo os pedidos em pendentes, atrasados na coleta e na entrega
+    pendentes, atrasados_coleta, atrasados_entrega = dividir_pedidos(pedidos)
+
+    # Exibindo pedidos divididos
+    st.subheader("Pedidos Pendentes")
+    st.dataframe(pendentes)
+
+    st.subheader("Pedidos Atrasados na Coleta")
+    st.dataframe(atrasados_coleta)
+
+    st.subheader("Pedidos Atrasados na Entrega")
+    st.dataframe(atrasados_entrega)
 
     # Gerando o mapa
     st.subheader("Mapa da Frota e Pedidos")
